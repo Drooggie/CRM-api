@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+use App\Modules\StubFolderName\Controllers\StubControllerName;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::group(['prefix' => 'StubRoutePrefix'], function () {
+
+    Route::get('/', [StubControllerName::class, 'index']);
+    Route::get('/{StubModelName}', [StubControllerName::class, 'show']);
+
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/', [StubControllerName::class, 'store']);
+        Route::get('/create', [StubControllerName::class, 'create']);
+        Route::path('/{StubModelName}', [StubControllerName::class, 'update'])->can('update', 'StubModelName');
+        Route::get('/{StubModelName}/edit', [StubControllerName::class, 'edit'])->can('edit', 'StubModelName');
+        Route::delete('/{StubModelName}', [StubControllerName::class, 'destroy'])->can('destroy', 'StubModelName');
+    });
+});

@@ -28,8 +28,6 @@ class DeleteModules extends Command
     {
         File::deleteDirectory('app/Modules');
 
-        echo ("\n");
-        $this->line("  \033[32;44m INFO \033[0m Modules folder successfully deleted");
-        echo ("\n");
+        $this->components->info("Modules folder successfully deleted");
     }
 }
