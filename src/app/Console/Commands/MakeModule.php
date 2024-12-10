@@ -20,7 +20,9 @@ class MakeModule extends Command
         {--all=}
         {--model}
         {--controller} 
-        {--migration}';
+        {--migration}
+        {--policy}
+        {--request}';
 
     /**
      * The console command description.
@@ -34,6 +36,7 @@ class MakeModule extends Command
     protected string $route;
     protected string $folder;
     protected string $base_path;
+    protected string $linux_path;
     protected string $model_path;
 
     /**
@@ -47,6 +50,8 @@ class MakeModule extends Command
         if ($this->option('all')) $this->createAll();
         if ($this->option('model')) $this->createModel();
         if ($this->option('routes')) $this->createRoutes();
+        if ($this->option('policy')) $this->createPolicies();
+        if ($this->option('request')) $this->createRequest();
         if ($this->option('migration')) $this->createMigration();
         if ($this->option('controller')) $this->createController();
     }
@@ -60,9 +65,11 @@ class MakeModule extends Command
 
         $this->universal_name = Str::singular($name);
 
-        $this->base_path = "App\\Modules\\" . $this->folder . "\\";
+        $this->base_path = "App\\Modules\\" . $this->folder . "\\" . $this->universal_name . "\\";
 
-        $this->model_path = $this->base_path . "Models\\" . $this->universal_name;
+        $this->linux_path = 'app/Modules/' . $this->folder . '/' . $this->universal_name . '/';
+
+        $this->model_path = $this->base_path .  "Models\\" . $this->universal_name;
 
         $this->migration_name = sprintf('create_%s_table', Str::plural($this->universal_name));
     }
@@ -72,6 +79,8 @@ class MakeModule extends Command
         if ($this->option('all')) return $this->option('all');
 
         if ($this->option('routes')) return $this->option('routes');
+
+        return '';
     }
 
     public function createAll()
@@ -99,7 +108,7 @@ class MakeModule extends Command
 
         $this->call("make:routes", [
             "route_name" => $this->universal_name,
-            "path" => 'app/Modules/' . $this->folder . '/routes',
+            "path" =>  $this->linux_path . 'routes',
             "folder" => $this->argument('folder'),
             "type" => $this->route,
         ]);
@@ -108,34 +117,45 @@ class MakeModule extends Command
     public function createPolicies()
     {
         $this->call('make:policy', [
-            "name" => $this->base_path . "Policies\\" . $this->universal_name . 'Policy',
+            "name" => $this->base_path .  "Policies\\"  .  $this->universal_name . 'Policy',
             "--model" => $this->model_path,
+        ]);
+    }
+
+    public function createRequest()
+    {
+        $this->call('make:request', [
+            "name" => $this->base_path . "Requests\\" . $this->universal_name . "Request"
         ]);
     }
 
     public function createMigration()
     {
 
-        $path_to_migrations = base_path('app/Modules/' . $this->folder . '/migrations/.' . $this->universal_name . 'Created');
+        $migration_exists = base_path('app/Modules/' . $this->folder . '/migrations/.' . $this->universal_name . 'Created');
 
-        if (File::exists($path_to_migrations)) {
+        if (File::exists($migration_exists)) {
             $this->fail("Migrations already exists.");
         }
 
         $this->call("make:migration", [
             "name" => $this->migration_name,
             "--create" => $this->universal_name,
-            "--path" => 'app/Modules/' . $this->folder . '/migrations',
+            "--path" => $this->linux_path . '/migrations',
         ]);
 
-        File::put($path_to_migrations, '');
+        File::put($migration_exists, '');
     }
 
     public function createController()
     {
-        $this->call('make:controller', [
+        $for_controller = [
             "name" =>  $this->base_path . "Controllers\\" . $this->universal_name . 'Controller',
-            "--model" => $this->model_path
-        ]);
+        ];
+
+        if ($this->option('all')) $for_controller[] = ["--model" => $this->model_path];
+        if ($this->option('model')) $for_controller[] = ["--model" => $this->model_path];
+
+        $this->call('make:controller', $for_controller);
     }
 }

@@ -63,10 +63,10 @@ class MakeRoutes extends Command
     {
         if ($this->type === 'web') {
 
-            $this->prefix = Str::lower($this->folder) . '/';
+            $this->prefix = Str::lower($this->folder . '/' . $this->route_name . '/');
         } elseif ($this->type === 'api') {
 
-            $this->prefix = 'api/v1/' . Str::lower($this->folder);
+            $this->prefix = 'api/v1/' . Str::lower($this->folder . '/' . $this->route_name . '/');
         }
     }
 
@@ -78,7 +78,8 @@ class MakeRoutes extends Command
             'StubFolderName' => $this->folder,
             'StubControllerName' => $this->route_name . 'Controller',
             'StubRoutePrefix' => $this->prefix,
-            'StubModelName' => Str::lower($this->route_name),
+            'StubLowerModelName' => Str::lower($this->route_name),
+            'StubUpperModelName' => $this->route_name,
         ];
     }
 
